@@ -115,7 +115,7 @@
  const limite=(prom,ms)=>Promise.race([prom,new Promise((_,rej)=>setTimeout(()=>rej(new Error('a leitura passou de '+ms/1000+' segundos sem resposta')),ms))]);
  async function buscar(c,pedir){
   if(c)return c;
-  if(window.MODO_EQUIPE){motivo='O comparativo não foi incluído nos dados publicados.';return null;}
+  if(window.MODO_EQUIPE){motivo='O comparativo anual ainda não foi publicado. Ele entra na próxima atualização do painel principal.';return null;}
   if(modoArquivo()){
    passo('Procurando o comparativo salvo neste navegador...');
    c=await LN().comparativoSalvo().catch(()=>null);
@@ -161,6 +161,6 @@
  // Se os dados já foram montados antes deste módulo carregar, usa o aviso guardado.
  if(window.__painelEvento)carregar(window.__painelEvento.detail?.comparativo||null);
  // Segurança: se o painel não avisar em 6 s, o comparativo é lido mesmo assim.
- setTimeout(()=>{if(!iniciou)carregar(null);},6000);
+ setTimeout(()=>{if(!iniciou&&!window.MODO_EQUIPE)carregar(null);},6000);
  render();
 })();

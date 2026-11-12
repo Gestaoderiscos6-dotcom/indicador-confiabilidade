@@ -49,7 +49,7 @@
  window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(valid.has(h))abrirAba(h,{scroll:false});});
  const EQUIPE=!!window.MODO_EQUIPE;
  if(EQUIPE){document.querySelector('.tab-update')?.remove();valid.delete('atualizacao');
-  const h1=document.querySelector('.brand-title h1');if(h1)h1.insertAdjacentHTML('beforeend','<span class="equipe-tag">'+icon('i-eye')+'EQUIPE</span>');}
+}
  let inicial=location.hash.slice(1);
  if(!valid.has(inicial)){try{inicial=localStorage.getItem(KEY)||'visao';}catch(e){inicial='visao';}}
  // Ao abrir o painel, nunca começa na aba Atualização (os dados salvos já aparecem na Visão geral).

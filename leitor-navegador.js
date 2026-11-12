@@ -582,10 +582,10 @@
   out.push({path:'.nojekyll',bytes:new Uint8Array(0)});
   return out;
  }
- async function pacoteDados(meta,mostrarNomes){
+ async function pacoteDados(meta,mostrarNomes,compAtual){
   const dados=await montarDoCache(meta);
   const pacote={cda:colunar(dados.cda),cdi:colunar(dados.cdi),arquivos:dados.arquivos.map(a=>({unidade:a.unidade,arquivo:a.arquivo,registros:a.registros})),
-   formatos:dados.formatos,formatos_avisos:[],colaboradores:mostrarNomes?dados.colaboradores:{},colaboradores_avisos:[],comparativo:dados.comparativo||await get('meta','comparativo').catch(()=>null)};
+   formatos:dados.formatos,formatos_avisos:[],colaboradores:mostrarNomes?dados.colaboradores:{},colaboradores_avisos:[],comparativo:compAtual||dados.comparativo||(await get('meta','comparativo').catch(()=>null))||null};
   const bytes=await gz(JSON.stringify(pacote));
   const js='/* Espelho do Indicador de Confiabilidade · publicado em '+new Date().toLocaleString('pt-BR')+' */\nwindow.DADOS_EQUIPE={gerado:'+JSON.stringify(meta.gerado||new Date().toISOString())+',publicado:'+JSON.stringify(new Date().toISOString())+',registros:'+(dados.cda.length+dados.cdi.length)+',b64:"'+b64(bytes)+'"};\n';
   return {js,registros:dados.cda.length+dados.cdi.length};
@@ -601,8 +601,13 @@
   const sis=pt.sistema||(pt.raiz?await filho(pt.raiz,'SISTEMA'):null);
   if(!sis)throw new Error('Pasta SISTEMA não encontrada. Escolha a pasta 2026 na aba Atualização.');
   if(!(await permissao(sis,false)))throw new Error('Sem acesso à pasta SISTEMA nesta sessão. Clique em Atualizar dados (ou Publicar agora) e confirme a pasta 2026.');
+  // Comparativo: lê o arquivo da pasta SISTEMA na hora da publicação (reserva: cópia salva).
+  let compAtual=null;
+  try{p('Lendo o comparativo anual');compAtual=await comPrazo(lerComparativo(sis,null),30000,'ler o comparativo');}catch(e){console.warn('[Espelho] comparativo:',e);}
+  if(compAtual&&Object.keys(compAtual.unidades||{}).length){meta.comparativo=compAtual;await put('meta','snapshot',meta).catch(()=>{});await put('meta','comparativo',compAtual).catch(()=>{});}
+  else compAtual=null;
   p('Preparando os dados do espelho');
-  const {js,registros}=await pacoteDados(meta,cfg.mostrarNomes);
+  const {js,registros}=await pacoteDados(meta,cfg.mostrarNomes,compAtual);
   const arquivos=await arquivosDoEspelho(sis,js);
   p('Conectando ao GitHub');
   const info=await gh(cfg,'GET','');
