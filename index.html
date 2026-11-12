@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#ffffff" name="theme-color"/>
+<meta content="Indicador de Confiabilidade | Gestão de Riscos — Grupo Carrefour Brasil" name="description"/>
+<title>Indicador de Confiabilidade | Gestão de Riscos · Espelho</title>
+<link rel="icon" href="assets/logo-gestao-riscos.png"/>
+<link href="style.css?v=16.0.0" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<!-- ================= PICTOGRAMAS (SVG locais) ================= -->
+<svg aria-hidden="true" class="icon-defs" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="g-gauge" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9bd21c"/><stop offset=".55" stop-color="#3cbf6b"/><stop offset="1" stop-color="#00b2d8"/></linearGradient>
+<linearGradient id="g-gauge-alert" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7941d"/><stop offset="1" stop-color="#e30613"/></linearGradient>
+</defs>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect height="7" rx="1.8" width="7" x="3" y="3"/><rect height="7" rx="1.8" width="7" x="14" y="3"/><rect height="7" rx="1.8" width="7" x="3" y="14"/><rect height="7" rx="1.8" width="7" x="14" y="14"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></symbol>
+<symbol id="i-boxes" viewBox="0 0 24 24"><path d="M3 13h8v8H3zM13 13h8v8h-8zM8 3h8v8H8z"/><path d="M6 13v3M17 13v3M12 3v3"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="i-shield-alert" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M12 8v4m0 4h.01"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m10.3 3.9-8.1 14a2 2 0 0 0 1.7 3h16.2a2 2 0 0 0 1.7-3l-8.1-14a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16M7 16V9m5 7V4m5 12v-5"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10m-7 6h4"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5 9a8 8 0 0 1 14-2l1 5M4 12l1 5a8 8 0 0 0 14-2"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 5a3 3 0 0 1 0 6m2 9v-2a6 6 0 0 0-3-5"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V4h11v17M15 10h5v11M2 21h20M8 8h3M8 12h3M8 16h3"/></symbol>
+<symbol id="i-store" viewBox="0 0 24 24"><path d="M3 9 4.5 4h15L21 9M3 9v1a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0V9M3 9h18M5 13v8h14v-8M10 21v-5h4v5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+<symbol id="i-sunset" viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0M12 9V2m-7.8 8.2 1.4 1.4M1 18h2m18 0h2m-4.2-6.4 1.4-1.4M23 22H1M16 5l-4 4-4-4"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/></symbol>
+<symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4m6 0h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4m-6 0H5a1 1 0 0 1-1-1v-4M4 12h16"/></symbol>
+<symbol id="i-barcode" viewBox="0 0 24 24"><path d="M3 5v14M7 5v14M10 5v14M14 5v14M17 5v14M21 5v14"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="i-gauge" viewBox="0 0 24 24"><path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/><circle cx="12" cy="14" r="1.5"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+<symbol id="i-package" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4ZM3 7v10l9 4 9-4V7M12 11v10m-5-6 3 1.5"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+<symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="i-plus-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></symbol>
+<symbol id="i-minus-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></symbol>
+<symbol id="i-x-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6m0-6-6 6"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6 18 18M18 6 6 18"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect height="16" rx="2" width="18" x="3" y="5"/><path d="M7 3v4m10-4v4M3 10h18"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 1.8 7.2L21 11l-7.2 1.8L12 20l-1.8-7.2L3 11l7.2-1.8L12 2Z"/></symbol>
+<symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6M9 15h6M9 18h4"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z"/><path d="M14 3v6h6"/></symbol>
+<symbol id="i-sheet" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></symbol>
+<symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></symbol>
+<symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.2 4.2l2.1 2.1m11.4 11.4 2.1 2.1M2 12h3m14 0h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect height="10" rx="2" width="16" x="4" y="11"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+<symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-compare" viewBox="0 0 24 24"><path d="M8 3 4 7l4 4M4 7h12M16 21l4-4-4-4M20 17H8"/></symbol>
+<symbol id="i-cart" viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.1a2 2 0 0 0 2-1.5L21.5 8H6"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></symbol>
+<symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 3 3 6l2 5 3-1v11h8V10l3 1 2-5-5-3a4 4 0 0 1-8 0Z"/></symbol>
+<symbol id="i-sofa" viewBox="0 0 24 24"><path d="M5 11V8a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v3"/><path d="M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 1 1 4 0v5H3v-5ZM6 18v2m12-2v2"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></symbol>
+<symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+<symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 8 5-3 5 3-1.5-8"/></symbol>
+<symbol id="i-chev-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
+
+<!-- ================= CABEÇALHO ================= -->
+<header class="masthead" id="topo">
+ <div class="brand-strip" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+ <div class="masthead-inner">
+  <div class="brand-group">
+   <img class="brand-logo brand-gr" alt="Gestão de Riscos" src="assets/logo-gestao-riscos.png"/>
+   <span class="brand-sep"></span>
+   <img class="brand-logo brand-carrefour" alt="Grupo Carrefour Brasil" src="assets/logo-grupo-carrefour.png" onerror="this.remove()"/>
+   <div class="brand-title">
+    <span class="brand-kicker"><svg class="ico"><use href="#i-shield"/></svg> Gestão de Riscos · Supply</span>
+    <h1>Indicador de Confiabilidade</h1>
+    <p>Qualidade da conferência · CDA · CDI · Regionais</p>
+   </div>
+  </div>
+  <div class="masthead-actions">
+   <div class="sync-chip" id="syncChip" title="Situação dos dados">
+    <span class="sync-dot"></span>
+    <div><b id="syncTitulo">Conectando…</b><small id="syncDetalhe">Leitor local</small></div>
+   </div>
+   <div class="tool-group" role="group" aria-label="Exportações">
+    <button type="button" class="tool-btn" id="pdf" title="PDF da visão atual"><svg class="ico"><use href="#i-pdf"/></svg><span>PDF</span></button>
+    <button type="button" class="tool-btn" id="pdfTodos" title="PDF completo (todas as visões)"><svg class="ico"><use href="#i-download"/></svg><span>PDF completo</span></button>
+   </div>
+   <button type="button" class="btn-update" id="btnAtualizarTopo" title="Ler arquivos novos das pastas CDA e CDI e atualizar o painel">
+    <svg class="ico"><use href="#i-refresh"/></svg><span>Atualizar dados</span><em class="update-badge" id="updateBadge" hidden>0</em>
+   </button>
+  </div>
+ </div>
+
+ <!-- Abas superiores -->
+ <nav class="tabs" aria-label="Seções do indicador">
+  <div class="tabs-track" role="tablist" id="tabs">
+   <button type="button" role="tab" class="tab" data-tab="visao" style="--tc:#0a4fa3" aria-selected="true"><span class="tab-ico"><svg class="ico"><use href="#i-grid"/></svg></span><span class="tab-txt">Visão geral</span></button>
+   <button type="button" role="tab" class="tab" data-tab="evolucao" style="--tc:#00a8cf"><span class="tab-ico"><svg class="ico"><use href="#i-trend"/></svg></span><span class="tab-txt">Evolução diária</span></button>
+   <button type="button" role="tab" class="tab" data-tab="operacao" style="--tc:#2fb35f"><span class="tab-ico"><svg class="ico"><use href="#i-layers"/></svg></span><span class="tab-txt">Departamentos e turnos</span></button>
+   <button type="button" role="tab" class="tab" data-tab="divergencias" style="--tc:#e30613"><span class="tab-ico"><svg class="ico"><use href="#i-alert"/></svg></span><span class="tab-txt">Divergências</span></button>
+   <button type="button" role="tab" class="tab" data-tab="colaboradores" style="--tc:#9b2c74"><span class="tab-ico"><svg class="ico"><use href="#i-users"/></svg></span><span class="tab-txt">Colaboradores</span></button>
+   <button type="button" role="tab" class="tab" data-tab="historico" style="--tc:#0067a0"><span class="tab-ico"><svg class="ico"><use href="#i-calendar"/></svg></span><span class="tab-txt">Histórico e comparativo</span></button>
+   <button type="button" role="tab" class="tab" data-tab="lojas" style="--tc:#f7941d"><span class="tab-ico"><svg class="ico"><use href="#i-store"/></svg></span><span class="tab-txt">Lojas e formatos</span></button>
+   <button type="button" role="tab" class="tab tab-update" data-tab="atualizacao" style="--tc:#1449a6"><span class="tab-ico"><svg class="ico"><use href="#i-database"/></svg></span><span class="tab-txt">Atualização</span><em class="tab-badge" id="tabBadge" hidden>0</em></button>
+   <span class="tab-ink" aria-hidden="true"></span>
+  </div>
+ </nav>
+</header>
+
+<!-- ================= FILTROS ================= -->
+<section aria-label="Filtros da análise" class="filterbar" id="filterbar">
+ <div class="filterbar-inner">
+  <button type="button" class="filter-toggle" id="filterToggle" aria-expanded="false" aria-controls="filterControls"><svg class="ico"><use href="#i-sliders"/></svg><span>Filtros</span><em id="filterCount" hidden>0</em><svg class="ico chev"><use href="#i-chev-down"/></svg></button>
+  <div class="filter-label"><span class="filter-label-ico"><svg class="ico"><use href="#i-sliders"/></svg></span><div><b>Filtros</b><small>Aplicados a todas as abas</small></div></div>
+  <div class="controls" id="filterControls">
+   <label class="ctl" for="visao"><span class="ctl-ico"><svg class="ico"><use href="#i-building"/></svg></span><span class="ctl-body"><small>Unidade</small><select id="visao"><option value="geral">CDA Geral</option><option value="cda">CDA</option><option value="cdi">CDI / CDX</option><option value="regionais">Regionais</option></select></span></label>
+   <label class="ctl" for="ano"><span class="ctl-ico"><svg class="ico"><use href="#i-calendar"/></svg></span><span class="ctl-body"><small>Ano</small><select id="ano"><option value="">Todos</option></select></span></label>
+   <label class="ctl" for="mes"><span class="ctl-ico"><svg class="ico"><use href="#i-history"/></svg></span><span class="ctl-body"><small>Mês</small><select id="mes"><option value="">Todos</option></select></span></label>
+   <label class="ctl" for="turno"><span class="ctl-ico"><svg class="ico"><use href="#i-clock"/></svg></span><span class="ctl-body"><small>Turno</small><select id="turno"><option value="">Todos</option></select></span></label>
+   <label class="ctl" for="depto"><span class="ctl-ico"><svg class="ico"><use href="#i-layers"/></svg></span><span class="ctl-body"><small>Departamento</small><select id="depto"><option value="">Todos</option></select></span></label>
+   <label class="ctl" for="loja"><span class="ctl-ico"><svg class="ico"><use href="#i-store"/></svg></span><span class="ctl-body"><small>Loja</small><select id="loja"><option value="">Todas</option></select></span></label>
+   <button type="button" class="reset-btn" id="limparFiltros" title="Limpar filtros"><svg class="ico"><use href="#i-refresh"/></svg><span>Limpar</span></button>
+  </div>
+ </div>
+</section>
+
+<main class="content">
+
+<!-- =============== ABA: VISÃO GERAL =============== -->
+<section class="tabpanel" data-panel="visao" style="--c:#0a4fa3" role="tabpanel" id="visao-geral">
+ <div class="block-title"><div class="bt-ico"><svg class="ico"><use href="#i-chart"/></svg></div><div><span class="eyebrow">Painel de indicadores</span><h3>Confiabilidade da conferência</h3></div><span class="small-tag" id="heroPeriodo"><svg class="ico"><use href="#i-calendar"/></svg> Todos os períodos</span></div>
+ <div class="dash">
+  <div class="kpiGrid" id="kpiGrid"></div>
+  <div class="nsl-card">
+   <div class="nsl-top"><span class="nsl-icon"><svg class="ico"><use href="#i-gauge"/></svg></span><div><span class="nsl-small">NÍVEL DE SERVIÇO</span><span class="nsl-label">NSL da seleção</span></div></div>
+   <div class="nsl-meter">
+    <svg viewBox="0 0 210 124" class="nsl-gauge" role="img" aria-label="Medidor de NSL">
+     <path class="gauge-base" d="M 22 105 A 83 83 0 0 1 188 105"/>
+     <path class="gauge-progress" id="nslArco" d="M 22 105 A 83 83 0 0 1 188 105"/>
+     <circle class="gauge-start" cx="22" cy="105" r="4.5"/>
+    </svg>
+    <div class="nsl-meter-value"><strong id="nsl">—</strong><span>meta ≤ 0,40%</span></div>
+   </div>
+   <div class="nsl-meter-foot"><small class="nsl-meta"><svg class="ico"><use href="#i-target"/></svg> META <b>0,40%</b></small><span id="nslDelta">—</span></div>
+   <div class="nsl-status" id="nslSituacao">Aguardando indicadores</div>
+  </div>
+ </div>
+
+ <div class="block-title"><div class="bt-ico"><svg class="ico"><use href="#i-arrow-right"/></svg></div><div><span class="eyebrow">Acesso rápido</span><h3>Análises</h3></div></div>
+ <div class="shortcuts">
+  <button type="button" class="shortcut" data-goto="evolucao" style="--c:#00b2d8"><span class="sc-ico"><svg class="ico"><use href="#i-trend"/></svg></span><b>Evolução diária</b><small>Erros e NSL dia a dia</small><svg class="ico sc-arrow"><use href="#i-arrow-right"/></svg></button>
+  <button type="button" class="shortcut" data-goto="operacao" style="--c:#1449a6"><span class="sc-ico"><svg class="ico"><use href="#i-layers"/></svg></span><b>Departamentos e turnos</b><small>Mapa por setor e turno</small><svg class="ico sc-arrow"><use href="#i-arrow-right"/></svg></button>
+  <button type="button" class="shortcut" data-goto="divergencias" style="--c:#e30613"><span class="sc-ico"><svg class="ico"><use href="#i-alert"/></svg></span><b>Divergências</b><small>Produtos, suportes e circuitos</small><svg class="ico sc-arrow"><use href="#i-arrow-right"/></svg></button>
+  <button type="button" class="shortcut" data-goto="colaboradores" style="--c:#3cbf6b"><span class="sc-ico"><svg class="ico"><use href="#i-users"/></svg></span><b>Colaboradores</b><small>Preparadores por turno</small><svg class="ico sc-arrow"><use href="#i-arrow-right"/></svg></button>
+  <button type="button" class="shortcut" data-goto="historico" style="--c:#7a5af8"><span class="sc-ico"><svg class="ico"><use href="#i-calendar"/></svg></span><b>Histórico e comparativo</b><small>2025 × 2026 e mês a mês</small><svg class="ico sc-arrow"><use href="#i-arrow-right"/></svg></button>
+  <button type="button" class="shortcut" data-goto="lojas" style="--c:#f7941d"><span class="sc-ico"><svg class="ico"><use href="#i-store"/></svg></span><b>Lojas e formatos</b><small>Ranking da rede</small><svg class="ico sc-arrow"><use href="#i-arrow-right"/></svg></button>
+ </div>
+</section>
+
+<!-- =============== ABA: EVOLUÇÃO DIÁRIA =============== -->
+<section class="tabpanel" data-panel="evolucao" style="--c:#00a8cf" role="tabpanel" id="evolucao" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-trend"/></svg></div><div><span class="eyebrow">Acompanhamento</span><h2>Evolução diária</h2><p>Erros · NSL · meta 0,40%</p></div></div>
+ <div class="panel chart-panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-chart"/></svg></span><div><h3>Comportamento dos indicadores</h3><p>Distribuição por dia do período selecionado</p></div></div><span class="chart-legend"><span><i class="leg-bar"></i> Erros</span><span><i class="leg-line"></i> NSL</span><span><i class="leg-meta"></i> Meta 0,40%</span></span></div><div class="chart"><canvas aria-label="Gráfico diário" id="diario"></canvas></div></div>
+</section>
+
+<!-- =============== ABA: DEPARTAMENTOS E TURNOS =============== -->
+<section class="tabpanel" data-panel="operacao" style="--c:#2fb35f" role="tabpanel" id="operacao" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-layers"/></svg></div><div><span class="eyebrow">Performance operacional</span><h2>Departamentos e turnos</h2><p>Ocorrências por setor e NSL por turno</p></div></div>
+ <div class="twocol">
+  <article class="panel panel-departamentos"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-building"/></svg></span><div><h3>Ocorrências por departamento</h3><p>Por turno · apenas setores com divergência</p></div></div></div><div class="dept-dashboard" id="departamentos"></div></article>
+  <article class="panel panel-turnos"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-clock"/></svg></span><div><h3>NSL por turno</h3><p>Comparativo entre T1, T2 e T3</p></div></div></div><div class="shift-overview" id="turnos"></div><div aria-label="Comparativo de desempenho entre turnos" class="turno-resumo" id="turnoResumo">O comparativo por turno será exibido após a leitura dos dados.</div></article>
+ </div>
+</section>
+
+<!-- =============== ABA: DIVERGÊNCIAS =============== -->
+<section class="tabpanel" data-panel="divergencias" style="--c:#e30613" role="tabpanel" id="divergencias" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-alert"/></svg></div><div><span class="eyebrow">Análise de divergências</span><h2>Divergências</h2><p>Produtos, suportes e circuitos · clique em uma linha para detalhar</p></div></div>
+ <div class="twocol">
+  <article class="panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-package"/></svg></span><div><h3>Top 10 produtos ofensores</h3><p>Itens com maior volume de divergências</p></div></div></div><div class="scroll" id="produtos"></div></article>
+  <article class="panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-boxes"/></svg></span><div><h3>Estratificação de suportes</h3><p>Leitura por identificação de suporte</p></div></div><div class="quickfind"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="busca_suportes" data-target="suportes" aria-label="Buscar suporte" placeholder="Buscar qualquer suporte" autocomplete="off"/></div></div><div class="table-meta" id="contagem_suportes" aria-live="polite"></div><div class="scroll" id="suportes"></div></article>
+ </div>
+ <article class="panel panel-spaced"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-route"/></svg></span><div><h3>Erros por circuito</h3><p>Classificação oficial da Gestão de Riscos</p></div></div><div class="quickfind"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="busca_circuitos" data-target="circuitos" aria-label="Buscar circuito" placeholder="Buscar qualquer circuito" autocomplete="off"/></div></div><div class="table-meta" id="contagem_circuitos" aria-live="polite"></div><div class="scroll" id="circuitos"></div></article>
+</section>
+
+<!-- =============== ABA: COLABORADORES =============== -->
+<section class="tabpanel" data-panel="colaboradores" style="--c:#9b2c74" role="tabpanel" id="colaboradores" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-users"/></svg></div><div><span class="eyebrow">Pessoas e processos</span><h2>Desempenho dos preparadores</h2><p>Preparadores por turno · nomes pela base UCA</p></div></div>
+ <div class="turno-switch" role="tablist" aria-label="Escolher turno">
+  <button type="button" class="ts-btn active" data-turno="T1" style="--shift:#00b2d8"><svg class="ico"><use href="#i-sun"/></svg>1º Turno <small>Manhã</small></button>
+  <button type="button" class="ts-btn" data-turno="T2" style="--shift:#1449a6"><svg class="ico"><use href="#i-sunset"/></svg>2º Turno <small>Tarde</small></button>
+  <button type="button" class="ts-btn" data-turno="T3" style="--shift:#7a5af8"><svg class="ico"><use href="#i-moon"/></svg>3º Turno <small>Noite</small></button>
+ </div>
+ <div class="three" id="turnosColab" data-turno="T1">
+  <article class="panel shift-panel" data-t="T1" style="--shift:#00b2d8"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-sun"/></svg></span><div><h3>1º Turno <span class="shift-pill">T1</span></h3><p>Manhã · colaboradores e ocorrências</p></div></div><div class="quickfind"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="busca_preparadoresT1" data-target="preparadoresT1" aria-label="Buscar colaborador T1" placeholder="Nome ou código UCA" autocomplete="off"/></div></div><div class="table-meta" id="contagem_preparadoresT1" aria-live="polite"></div><div class="scroll" id="preparadoresT1"></div></article>
+  <article class="panel shift-panel" data-t="T2" style="--shift:#1449a6"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-sunset"/></svg></span><div><h3>2º Turno <span class="shift-pill">T2</span></h3><p>Tarde · colaboradores e ocorrências</p></div></div><div class="quickfind"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="busca_preparadoresT2" data-target="preparadoresT2" aria-label="Buscar colaborador T2" placeholder="Nome ou código UCA" autocomplete="off"/></div></div><div class="table-meta" id="contagem_preparadoresT2" aria-live="polite"></div><div class="scroll" id="preparadoresT2"></div></article>
+  <article class="panel shift-panel" data-t="T3" style="--shift:#7a5af8"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-moon"/></svg></span><div><h3>3º Turno <span class="shift-pill">T3</span></h3><p>Noite · colaboradores e ocorrências</p></div></div><div class="quickfind"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="busca_preparadoresT3" data-target="preparadoresT3" aria-label="Buscar colaborador T3" placeholder="Nome ou código UCA" autocomplete="off"/></div></div><div class="table-meta" id="contagem_preparadoresT3" aria-live="polite"></div><div class="scroll" id="preparadoresT3"></div></article>
+ </div>
+</section>
+
+<!-- =============== ABA: HISTÓRICO =============== -->
+<section class="tabpanel" data-panel="historico" style="--c:#0067a0" role="tabpanel" id="historico" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-calendar"/></svg></div><div><span class="eyebrow">Histórico</span><h2>Histórico e comparativo</h2><p>Comparativo anual de NSL e resultado mês a mês</p></div></div>
+ <article class="panel comp-panel" id="comparativoPanel">
+  <div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-compare"/></svg></span><div><h3 id="compTitulo">Comparativo anual</h3><p id="compFonte">comparativo_anual.xlsx</p></div></div><div class="comp-units" id="compUnidades"></div></div>
+  <div class="comp-empty" id="compVazio"><span><svg class="ico"><use href="#i-sheet"/></svg></span><div><b id="compVazioTitulo">Carregando comparativo…</b><small id="compMotivo">Lendo comparativo_anual.xlsx da pasta SISTEMA.</small></div><div class="comp-acoes"><button type="button" class="btn-ghost" id="compLer" hidden><svg class="ico"><use href="#i-refresh"/></svg> Ler comparativo</button><button type="button" class="btn-ghost" id="compArquivoBtn" hidden title="Escolher o arquivo comparativo_anual.xlsx diretamente"><svg class="ico"><use href="#i-sheet"/></svg> Escolher arquivo</button><input type="file" id="compArquivo" accept=".xlsx,.xlsm" hidden/></div></div>
+  <div id="compConteudo" hidden>
+   <div class="comp-cards" id="compCards"></div>
+   <div class="comp-nota" id="compNota"></div>
+   <div class="comp-body"><div class="chart comp-chart"><canvas id="compChart" aria-label="Gráfico comparativo anual"></canvas></div><div class="scroll comp-table" id="compTabela"></div></div>
+  </div>
+ </article>
+ <article class="panel panel-spaced"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-history"/></svg></span><div><h3>Indicadores por mês</h3><p>Comparativo do período selecionado</p></div></div></div><div class="scroll" id="mensal"></div></article>
+
+</section>
+
+<!-- =============== ABA: LOJAS =============== -->
+<section class="tabpanel" data-panel="lojas" style="--c:#f7941d" role="tabpanel" id="lojas-formatos" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-store"/></svg></div><div><span class="eyebrow">Rede e formatos</span><h2>Performance por loja</h2><p>Ranking de lojas e formatos</p></div></div>
+ <div class="twocol">
+  <article class="panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-award"/></svg></span><div><h3>Ranking de lojas</h3><p>Maiores ofensores do período</p></div></div><div class="quickfind"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="busca_lojas" data-target="lojas" aria-label="Buscar loja" placeholder="Pesquisar sigla da loja" autocomplete="off"/></div></div><div class="table-meta" id="contagem_lojas" aria-live="polite"></div><div class="scroll" id="lojas"></div></article>
+  <article class="panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-building"/></svg></span><div><h3>Performance por formato</h3><p>Hiper, Super, Express e demais formatos</p></div></div></div><div class="format-alert" hidden id="alertaFormatos" role="status"></div><div class="scroll" id="formatos"></div></article>
+ </div>
+</section>
+
+<!-- =============== ABA: ATUALIZAÇÃO =============== -->
+<section class="tabpanel" data-panel="atualizacao" style="--c:#1449a6" role="tabpanel" id="atualizacao" hidden>
+ <div class="section-heading"><div class="heading-icon"><svg class="ico"><use href="#i-database"/></svg></div><div><span class="eyebrow">Central de atualização</span><h2>Atualização dos dados</h2><p>Pastas <b>CDA</b>, <b>CDI</b> e <b>SISTEMA</b> · somente arquivos novos ou alterados são lidos</p></div></div>
+
+ <div class="update-hero">
+  <div class="uh-folder" id="pastaInfo">
+   <span class="uh-folder-ico"><svg class="ico"><use href="#i-folder"/></svg></span>
+   <div><small>Pasta dos dados</small><b id="pastaNome">Nenhuma pasta escolhida</b><em id="pastaDetalhe">Escolha a pasta que contém CDA, CDI e SISTEMA</em></div>
+   <button type="button" class="btn-ghost" id="escolherPasta"><svg class="ico"><use href="#i-folder"/></svg> Escolher pasta</button>
+  </div>
+  <div class="uh-steps">
+   <div class="uh-step"><span class="uh-n"><svg class="ico"><use href="#i-folder"/></svg></span><div><b>1. Escolha a pasta</b><small>Somente na primeira vez</small></div></div>
+   <div class="uh-step"><span class="uh-n"><svg class="ico"><use href="#i-sheet"/></svg></span><div><b>2. Salve os XLSX</b><small>Nas pastas CDA e CDI</small></div></div>
+   <div class="uh-step"><span class="uh-n"><svg class="ico"><use href="#i-refresh"/></svg></span><div><b>3. Clique em Atualizar</b><small>Lê apenas o que mudou</small></div></div>
+  </div>
+  <div class="uh-actions">
+   <button type="button" class="btn-ghost" id="verificarPastas"><svg class="ico"><use href="#i-search"/></svg> Verificar pastas</button>
+   <button type="button" class="primary" id="carregar"><svg class="ico"><use href="#i-refresh"/></svg> Atualizar agora</button>
+  </div>
+ </div>
+
+ <div class="update-summary" id="updateSummary">
+  <div class="us-card us-new"><span><svg class="ico"><use href="#i-plus-circle"/></svg></span><div><strong id="usNovos">—</strong><small>Arquivos novos</small></div></div>
+  <div class="us-card us-changed"><span><svg class="ico"><use href="#i-refresh"/></svg></span><div><strong id="usAlterados">—</strong><small>Alterados</small></div></div>
+  <div class="us-card us-ok"><span><svg class="ico"><use href="#i-check-circle"/></svg></span><div><strong id="usEmDia">—</strong><small>Em dia</small></div></div>
+  <div class="us-card us-removed"><span><svg class="ico"><use href="#i-minus-circle"/></svg></span><div><strong id="usRemovidos">—</strong><small>Removidos</small></div></div>
+ </div>
+
+ <div class="load">
+  <div class="loadInfo"><span class="read-icon"><svg class="ico"><use href="#i-pulse"/></svg></span><div class="load-copy"><b>Situação da leitura</b><small aria-live="polite" id="status" role="status">Conectando ao leitor local...</small><small id="ucaStatus">Consultando nomes dos colaboradores...</small></div></div>
+ </div>
+
+ <div class="twocol">
+  <article class="panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-folder"/></svg></span><div><h3>Pasta CDA</h3><p id="pastaCDA">—</p></div></div></div><div class="file-list" id="arquivosCDA"><div class="file-empty">Clique em “Verificar pastas”.</div></div></article>
+  <article class="panel"><div class="panel-top"><div class="pt-title"><span class="panel-icon"><svg class="ico"><use href="#i-folder"/></svg></span><div><h3>Pasta CDI</h3><p id="pastaCDI">—</p></div></div></div><div class="file-list" id="arquivosCDI"><div class="file-empty">Clique em “Verificar pastas”.</div></div></article>
+ </div>
+
+ <article class="panel gh-panel" id="ghPanel">
+  <div class="panel-top"><div class="pt-title"><span class="panel-icon gh-ico"><svg class="ico"><use href="#i-upload"/></svg></span><div><h3>Espelho no GitHub</h3><p>Ao clicar em Atualizar dados, a versão espelho (sem PDF e sem atualizar) é publicada automaticamente</p></div></div><span class="gh-status" id="ghStatus">Não configurado</span></div>
+  <div class="gh-body">
+   <label class="gh-field"><small>Repositório</small><input type="text" id="ghRepo" autocomplete="off" spellcheck="false" placeholder="https://github.com/usuario/repositorio"/></label>
+   <label class="gh-field"><small>Token do GitHub <em id="ghTokenInfo"></em></small><input type="password" id="ghToken" autocomplete="off" spellcheck="false" placeholder="Cole aqui o token (github_pat_...)"/></label>
+   <label class="gh-check"><input type="checkbox" id="ghNomes" checked/><span>Mostrar nomes dos colaboradores no espelho</span></label>
+   <label class="gh-check"><input type="checkbox" id="ghAuto" checked/><span>Publicar automaticamente a cada “Atualizar dados”</span></label>
+   <div class="gh-actions"><button type="button" class="btn-ghost" id="ghSalvar"><svg class="ico"><use href="#i-check"/></svg> Salvar</button><button type="button" class="primary" id="ghPublicar"><svg class="ico"><use href="#i-upload"/></svg> Publicar agora</button></div>
+   <div class="gh-link" id="ghLink"></div>
+  </div>
+ </article>
+
+ <details class="admin-diagnostics" id="adminDiagnostico"><summary><span class="admin-glyph"><svg class="ico"><use href="#i-cog"/></svg></span><span class="admin-txt"><b>Diagnóstico de circuitos</b><small>Área administrativa · códigos aguardando classificação</small></span><span class="admin-count" id="adminCount">—</span></summary><div class="admin-diagnostics-body"><p>Ferramenta de conferência do administrador. A restrição de acesso por perfil será implementada em etapa futura; por enquanto, esta área não é privada.</p><div class="alert-box" hidden id="alertaCircuitos" role="alert"></div></div></details>
+</section>
+
+<div class="detail-dialog" id="detailDialog" hidden aria-hidden="true"><div class="detail-backdrop" data-close-detail></div><section class="detail-window" role="dialog" aria-modal="true" aria-labelledby="detailTitle"><div class="detail-top"><img class="detail-logo" alt="Gestão de Riscos" src="assets/logo-gr-horizontal-branco.png" onerror="this.remove()"/><div><span class="detail-eyebrow" id="detailKind">ANÁLISE OPERACIONAL</span><h2 id="detailTitle">Detalhamento</h2><p id="detailSubtitle">Informações da seleção atual</p></div><button type="button" class="detail-close" id="detailClose" title="Fechar detalhamento" aria-label="Fechar"><svg class="ico"><use href="#i-close"/></svg></button></div><div class="detail-content" id="detailContent"></div></section></div>
+</main>
+
+<footer class="site-footer">
+ <div class="foot-brands">
+  <div class="foot-brands-inner">
+   <div class="fb-label"><span class="fb-ico"><svg class="ico"><use href="#i-store"/></svg></span><div><b>Nossas bandeiras</b><small>Grupo Carrefour Brasil</small></div></div>
+   <img class="fb-logos" alt="Atacadão, Carrefour, Sam's Club, Carrefour Banco e Carrefour Property" src="assets/logo-bandeiras.png" onerror="this.closest('.foot-brands').remove()"/>
+  </div>
+ </div>
+ <div class="foot-dark">
+  <div class="foot-inner">
+   <img class="foot-gr" alt="Gestão de Riscos · Escola de Riscos Supply &amp; Online" src="assets/logo-gr-horizontal-branco.png" onerror="this.remove()"/>
+   <div class="foot-text">
+    <span>© Gestão de Riscos · Indicador de Confiabilidade <b>V15</b></span>
+    <span class="foot-meta"><svg class="ico"><use href="#i-lock"/></svg> Processado localmente · CDA / CDI / Regionais</span>
+   </div>
+  </div>
+ </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden><span class="toast-ico"><svg class="ico"><use href="#i-check-circle"/></svg></span><div><b id="toastTitulo"></b><small id="toastTexto"></small></div><button type="button" class="toast-x" aria-label="Fechar aviso" id="toastFechar"><svg class="ico"><use href="#i-close"/></svg></button></div>
+<button type="button" class="to-top" id="toTop" aria-label="Voltar ao topo" title="Voltar ao topo"><svg class="ico"><use href="#i-arrow-up"/></svg></button>
+
+<script>window.addEventListener('error',function(e){var s=document.getElementById('status');if(s)s.textContent='Erro na interface: '+e.message;});</script>
+<script>window.MODO_EQUIPE=true;document.documentElement.classList.add("modo-equipe");</script>
+<script src="dados-equipe.js?v=1794519411656"></script>
+<script src="leitor-navegador.js?v=16.1.0"></script>
+<script src="app.js?v=16.0.0"></script>
+<script src="painel-ui.js?v=16.0.0"></script>
+<script src="comparativo.js?v=15.7.0"></script>
+</body>
+</html>
