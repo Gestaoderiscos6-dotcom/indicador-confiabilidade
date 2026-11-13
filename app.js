@@ -249,7 +249,7 @@ async function carregarBases(forcarAtualizacao=false){
  $('status').textContent='Registros preparados. Montando indicadores...';
  await new Promise(resolve=>setTimeout(resolve,20));
  updateOptions();render();
- window.__painelDetalhe=null;document.dispatchEvent(window.__painelEvento=new CustomEvent('painel:atualizado',{detail:{refresh:forcarAtualizacao,cache:payload.cache_info||null,arquivos:payload.arquivos||[],gerado:payload.snapshot_gerado_em||null,cda:state.cda.length,cdi:state.cdi.length,avisos:(payload.avisos||[]).length,comparativo:payload.comparativo||null}}));
+ window.__painelDetalhe=null;document.dispatchEvent(window.__painelEvento=new CustomEvent('painel:atualizado',{detail:{refresh:forcarAtualizacao,cache:payload.cache_info||null,arquivos:payload.arquivos||[],gerado:payload.snapshot_gerado_em||null,cda:state.cda.length,cdi:state.cdi.length,avisos:(payload.avisos||[]).length,avisosLista:(payload.avisos||[]).slice(0,12),comparativo:payload.comparativo||null}}));
  $('status').textContent=`${fmt(state.cda.length)} registros CDA + ${fmt(state.cdi.length)} CDI | ${(payload.arquivos||[]).length} arquivo(s) | ${Object.keys(state.formatos).length} formatos de lojas | Atualizado em ${new Date().toLocaleTimeString('pt-BR')}`;
  if(!Object.keys(state.formatos).length && $('alertaFormatos')){$('alertaFormatos').hidden=false;$('alertaFormatos').textContent='⚠ Nenhum formato de loja carregado. Confira formatos_loja.xlsx na pasta SISTEMA e abra /api/diagnostico.';}
  if(state.colaboradoresAvisos.length){console.info('Cadastro UCA:',state.colaboradoresAvisos);}

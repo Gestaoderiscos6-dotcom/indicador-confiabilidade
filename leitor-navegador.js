@@ -126,11 +126,12 @@
     }
    }
   }
-  try{await walk(dir,'');}catch(e){avisos.push(unidade+': falha listando a pasta: '+e.message);}
+  let falhou=false;
+  try{await walk(dir,'');}catch(e){falhou=true;avisos.push(unidade+': não foi possível listar a pasta ('+(e.name||'Erro')+': '+e.message+'). Mantidos os dados da leitura anterior.');}
   out.sort((a,b)=>a.rel.localeCompare(b.rel,'pt-BR',{sensitivity:'base',numeric:true}));
-  if(!out.length)avisos.push(unidade+': nenhum XLSX encontrado na pasta '+dir.name+'.');
+  if(!out.length&&!falhou)avisos.push(unidade+': nenhum XLSX encontrado na pasta '+dir.name+'.');
   if(out.length>MAX_FILES)throw new Error('Quantidade de arquivos maior que '+MAX_FILES+' em '+unidade+'.');
-  return {arquivos:out,avisos};
+  return {arquivos:out,avisos,falhou};
  }
 
  /* ---------------- Leitura de planilhas (SheetJS) ---------------- */
@@ -330,11 +331,20 @@
   }
   if(!pt.sistema&&pt.raiz)pt.sistema=await filho(pt.raiz,'SISTEMA');
   const avisos=[],lista=[];
+  // Unidades cuja listagem não é confiável nesta rodada: os dados anteriores delas são preservados.
+  const preservar=new Set();
+  const anteriores=meta?.arquivos||[];
   for(const [u,h] of [['CDA',pt.cda],['CDI',pt.cdi]]){
-   if(!h){avisos.push('Pasta '+u+' não selecionada.');continue;}
-   const r=await listar(h,u);avisos.push(...r.avisos);
+   if(!h){avisos.push('Pasta '+u+' não selecionada.');preservar.add(u);continue;}
+   let r;
+   try{r=await comPrazo(listar(h,u),60000,'listar a pasta '+u);}
+   catch(e){r={arquivos:[],avisos:[u+': '+e.message+'. Mantidos os dados da leitura anterior.'],falhou:true};}
+   avisos.push(...r.avisos);
+   // listagem com erro, ou pasta "vazia" quando antes havia arquivos: não apaga nada
+   if(r.falhou||(!r.arquivos.length&&anteriores.some(x=>x.unidade===u))){preservar.add(u);if(!r.falhou)avisos.push(u+': a pasta apareceu vazia nesta leitura; mantidos os dados anteriores.');continue;}
    for(const a of r.arquivos)lista.push({...a,unidade:u});
   }
+  let falhasArquivo=0;
   let lidos=0,reuso=0;const arquivosMeta=[];
   const total=lista.length;
   for(let i=0;i<lista.length;i++){
@@ -352,11 +362,26 @@
     arquivosMeta.push({chave,unidade:a.unidade,nome:a.nome,rel:a.rel,sig,registros:rec.linhas.length});
     // Salva o progresso a cada arquivo novo: se a página fechar no meio, nada do que já foi lido se perde.
     if(lidos&&(lidos%2===0)){const parcial={...(meta||{}),gerado:new Date().toISOString(),arquivos:[...arquivosMeta,...(meta?.arquivos||[]).filter(x=>!arquivosMeta.some(y=>y.chave===x.chave)&&lista.some(l=>l.unidade+'|'+l.rel===x.chave))]};await put('meta','snapshot',parcial).catch(()=>{});}
-   }catch(e){avisos.push(a.unidade+'/'+a.nome+': '+(e.name||'Erro')+': '+e.message);}
+   }catch(e){
+    // Arquivo não abriu (em uso, rede instável...): mantém a leitura anterior dele, se existir.
+    falhasArquivo++;
+    const ant=anteriores.find(x=>x.chave===chave);
+    const recAnt=ant?await get('arquivos',chave).catch(()=>null):null;
+    if(ant&&recAnt){arquivosMeta.push(ant);avisos.push(a.unidade+'/'+a.nome+': não abriu agora ('+(e.name||'Erro')+'); mantida a leitura anterior. Feche o arquivo se estiver aberto e atualize de novo.');}
+    else avisos.push(a.unidade+'/'+a.nome+': não foi possível ler ('+(e.name||'Erro')+': '+e.message+'). Feche o arquivo se estiver aberto e atualize de novo.');
+   }
   }
-  // Remove do armazenamento arquivos que saíram das pastas.
+  // Unidades preservadas: mantém exatamente o que havia antes.
+  for(const x of anteriores)if(preservar.has(x.unidade)&&!arquivosMeta.some(y=>y.chave===x.chave))arquivosMeta.push(x);
+  // Proteção: se nada pôde ser lido e antes havia dados, não substitui a leitura salva.
+  const totalNovo=arquivosMeta.reduce((t,a)=>t+(a.registros||0),0);
+  const totalAnt=anteriores.reduce((t,a)=>t+(a.registros||0),0);
+  if(totalAnt>0&&totalNovo===0){
+   const e=new Error('A atualização não conseguiu ler as planilhas e por isso a leitura anterior foi mantida. '+(avisos.slice(0,2).join(' | ')||''));e.preservado=true;throw e;
+  }
+  // Remove do armazenamento só arquivos que realmente saíram das pastas listadas com sucesso.
   const validas=new Set(arquivosMeta.map(a=>a.chave));
-  for(const k of await keys('arquivos'))if(!validas.has(k))await del('arquivos',k);
+  for(const k of await keys('arquivos')){const u=String(k).split('|')[0];if(!validas.has(k)&&!preservar.has(u))await del('arquivos',k);}
   p('Lendo cadastros da pasta SISTEMA...');
   let fm={formatos:{},avisos:[]},uc={colaboradores:{},avisos:[]};
   try{fm=await lerFormatos(pt.sistema);}catch(e){fm.avisos.push('formatos_loja: '+e.message);}

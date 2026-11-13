@@ -684,6 +684,8 @@ button.primary:disabled{opacity:.8}
 .comp-nota{display:flex;align-items:center;gap:7px;margin:8px 16px 0;padding:9px 12px;border-radius:12px;background:var(--blue-50);border:1px solid #d6e3f6;font-size:12.5px;color:var(--ink-2)}
 .comp-nota .ico{width:16px;height:16px;color:var(--blue)}
 .comp-nota b{color:var(--navy)}
+.avisos-lista{margin:8px 0 0;padding:8px 10px 8px 26px;border-radius:10px;background:var(--orange-100);border:1px solid #fbd9ae;color:#8a5a12;font-size:12px;line-height:1.5}
+.avisos-lista li+li{margin-top:3px}
 /* ---------- Espelho no GitHub ---------- */
 .gh-panel{margin-top:16px}
 .gh-ico{background:#24292f!important;color:#fff!important}

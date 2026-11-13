@@ -210,8 +210,10 @@
   if(d.refresh){
    const lidos=c.reprocessados??null,reuso=c.reutilizados??null;
    const txt=lidos===null?(nf(d.cda)+' registros CDA + '+nf(d.cdi)+' CDI'):(lidos?nf(lidos)+' arquivo(s) novo(s)/alterado(s) lido(s)':'Nenhum arquivo novo: tudo já estava em dia')+(reuso!==null?' · '+nf(reuso)+' reaproveitado(s)':'');
-   toast('Atualização concluída',txt+(d.avisos?' · '+d.avisos+' aviso(s), veja a aba Atualização':''),d.avisos?'info':'ok');
+   const lista=(d.avisosLista||[]).filter(x=>!/\d+ (lojas|UCA)|formatos_loja\.xlsx:|uca_colaboradores\.xlsx:/i.test(x));
+   toast(lista.length?'Atualização concluída com avisos':'Atualização concluída',txt+(lista.length?' · '+lista[0]+(lista.length>1?' (+'+(lista.length-1)+' na aba Atualização)':''):''),lista.length?'info':'ok');
   }
+  {const ul=$('avisosLista');if(ul){const l=(d.avisosLista||[]).filter(x=>!/\d+ (lojas|UCA)|formatos_loja\.xlsx:|uca_colaboradores\.xlsx:/i.test(x));ul.hidden=!l.length;ul.innerHTML=l.map(x=>'<li>'+escH(x)+'</li>').join('');}}
   if(!EQUIPE){ultimaVerificacao=0;verificarPastas(true);}
  });
  document.addEventListener('painel:erro',ev=>{
