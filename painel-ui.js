@@ -143,7 +143,9 @@
   if(!LOCAL){card.className='uh-folder ok';nome.textContent='Leitor local (ABRIR_PAINEL.bat)';det.textContent='As pastas CDA e CDI são lidas pelo leitor do computador';if(btn)btn.hidden=true;return;}
   if(!window.LeitorNavegador.suportado){card.className='uh-folder warn';nome.textContent='Navegador sem suporte';det.textContent='Abra este arquivo no Google Chrome ou no Microsoft Edge';if(btn)btn.hidden=true;return;}
   const p=d?.pastas||{};
-  if(!p.cda&&!p.cdi){card.className='uh-folder warn';nome.textContent='Nenhuma pasta escolhida';det.textContent='Clique em Escolher pasta e selecione a pasta que contém CDA, CDI e SISTEMA';return;}
+  if(!p.cda&&!p.cdi){
+   if(window.LeitorNavegador.compartilhado&&window.LeitorNavegador.compartilhado()){card.className='uh-folder ok';nome.textContent='Dados da pasta SISTEMA';det.textContent='Este computador só lê os dados. Para atualizar a partir daqui, clique em Escolher pasta (pasta 2026)';return;}
+   card.className='uh-folder warn';nome.textContent='Nenhuma pasta escolhida';det.textContent='Clique em Escolher pasta e selecione a pasta que contém CDA, CDI e SISTEMA';return;}
   card.className='uh-folder ok';
   nome.textContent=p.raiz||[p.cda,p.cdi].filter(Boolean).join(' + ');
   det.textContent=['CDA '+(p.cda?'✓':'✗'),'CDI '+(p.cdi?'✓':'✗'),'SISTEMA '+(p.sistema?'✓':'✗')].join(' · ')+(d?.sem_permissao?' · aguardando autorização do navegador':'');
@@ -169,7 +171,10 @@
     if(LOCAL){
      d=await window.LeitorNavegador.verificar(!silencioso);
      pastaCard(d);
-     if(d.sem_pasta){badge(0);listaMsg('Escolha a pasta principal (a que contém CDA, CDI e SISTEMA).');if(!atualizando)chip('pending','Escolha a pasta dos dados','Aba Atualização › Escolher pasta');return d;}
+     if(d.sem_pasta){badge(0);
+      if(d.snapshot_gerado_em){listaMsg('Os dados deste computador vêm da pasta SISTEMA (atualizados no servidor). Para atualizar a partir daqui, clique em “Atualizar dados” e selecione a pasta 2026.');if(!atualizando)chip('ok','Dados até '+fmtData(d.snapshot_gerado_em),'Carregados da pasta do sistema');}
+      else{listaMsg('Escolha a pasta principal (a que contém CDA, CDI e SISTEMA).');if(!atualizando)chip('pending','Escolha a pasta dos dados','Aba Atualização › Escolher pasta');}
+      return d;}
      if(d.sem_permissao){
       // Dados já salvos: nada a fazer até você clicar em Atualizar (o navegador confirma o acesso nesse momento).
       listaMsg('Dados salvos neste computador. Para procurar arquivos novos clique em “Verificar pastas” ou “Atualizar dados” (se abrir a janela de pastas, clique em “Selecionar pasta”).');

@@ -68,12 +68,12 @@
  async function escolherPasta(inicio){
   if(!suportado)throw new Error('Este navegador não permite ler pastas. Use o Google Chrome ou o Microsoft Edge atualizados.');
   let dir;
-  const op={id:'confiabilidade-gr',mode:'read'};
+  const op={id:'confiabilidade-gr',mode:'readwrite'};
   if(inicio)op.startIn=inicio;
   try{dir=await window.showDirectoryPicker(op);}
   catch(e){
    if(e&&e.name==='AbortError')return null;
-   if(inicio&&e&&e.name==='TypeError'){try{dir=await window.showDirectoryPicker({id:'confiabilidade-gr',mode:'read'});}catch(e2){if(e2&&e2.name==='AbortError')return null;throw e2;}}
+   if(inicio&&e&&e.name==='TypeError'){try{dir=await window.showDirectoryPicker({id:'confiabilidade-gr',mode:'readwrite'});}catch(e2){if(e2&&e2.name==='AbortError')return null;throw e2;}}
    else throw e;
   }
   const nome=dir.name.toUpperCase();
@@ -96,9 +96,9 @@
     (em páginas abertas de pasta de rede esse aviso pode não aparecer e travar).
     Se o acesso não estiver liberado, abre a janela de seleção já na pasta 2026:
     basta clicar em "Selecionar pasta". Precisa ser chamado a partir de um clique. */
- async function garantirAcesso(aviso){
+ async function garantirAcesso(aviso,gravar=true){
   let pt=await pastas();
-  const liberado=async h=>{try{return !h||await h.queryPermission({mode:'read'})==='granted';}catch(e){return false;}};
+  const liberado=async h=>{try{return !h||await h.queryPermission({mode:'readwrite'})==='granted'||(!gravar&&await h.queryPermission({mode:'read'})==='granted');}catch(e){return false;}};
   if(pt.raiz){if(await liberado(pt.raiz))return pt;}
   else if((pt.cda||pt.cdi)&&await liberado(pt.cda)&&await liberado(pt.cdi)&&await liberado(pt.sistema))return pt;
   aviso&&aviso('Confirme a pasta 2026 na janela que abriu (clique em “Selecionar pasta”)');
@@ -315,6 +315,8 @@
   const p=progresso||(()=>{});
   const meta=await get('meta','snapshot').catch(()=>null);
   if(!forcar){
+   const D=compartilhado();
+   if(D&&(!meta||new Date(D.gerado)>new Date(meta.gerado||0))){try{return await carregarPacote(D,p);}catch(e){console.warn('[Painel] dados-painel.js',e);}}
    if(meta){p('Abrindo a última leitura salva neste navegador...');return montarDoCache(meta);}
    p('Primeiro acesso: abra a aba Atualização e clique em “Escolher pasta” (selecione a pasta que contém CDA, CDI e SISTEMA).');
    return null;
@@ -394,6 +396,8 @@
    pastas:{raiz:pt.raiz?.name||null,cda:pt.cda?.name||null,cdi:pt.cdi?.name||null,sistema:pt.sistema?.name||null}};
   if(!arquivosMeta.some(a=>a.unidade==='CDA'&&a.registros))avisos.push('ATENCAO: CDA sem registros. Nao use o CDA Geral como consolidado.');
   await put('meta','snapshot',novaMeta);
+  try{p('Salvando os dados na pasta SISTEMA para os outros computadores...');await comPrazo(gravarCompartilhado(pt.sistema,novaMeta),60000,'salvar dados-painel.js');}
+  catch(e){avisos.push('Os dados não foram salvos na pasta SISTEMA para os outros computadores ('+e.message+').');}
   p('Montando o painel...');
   return montarDoCache(novaMeta);
  }
@@ -402,12 +406,13 @@
  async function verificar(pedir=false){
   const pt=await pastas();
   const meta=await get('meta','snapshot').catch(()=>null);
-  const base={snapshot_gerado_em:meta?.gerado||null,modo:'navegador',pastas:{raiz:pt.raiz?.name||null,cda:pt.cda?.name||null,cdi:pt.cdi?.name||null,sistema:pt.sistema?.name||null},
+  const base={snapshot_gerado_em:(compartilhado()&&(!meta||new Date(compartilhado().gerado)>new Date(meta.gerado||0)))?compartilhado().gerado:(meta?.gerado||null),modo:'navegador',pastas:{raiz:pt.raiz?.name||null,cda:pt.cda?.name||null,cdi:pt.cdi?.name||null,sistema:pt.sistema?.name||null},
    resumo:{novos:0,alterados:0,em_dia:0,removidos:0},unidades:{},avisos:[]};
   if(!pt.cda&&!pt.cdi)return {...base,sem_pasta:true};
   if(pedir){try{await garantirAcesso();}catch(e){return {...base,sem_permissao:true};}}
   else for(const h of [pt.cda,pt.cdi])if(h&&!(await permissao(h,false)))return {...base,sem_permissao:true};
-  const conhecidos=new Map((meta?.arquivos||[]).map(a=>[a.chave,a]));const vistos=new Set();
+  const D=compartilhado();const ref=(meta&&(!D||new Date(meta.gerado||0)>=new Date(D.gerado)))?meta.arquivos:(D?.arquivos||meta?.arquivos||[]);
+  const conhecidos=new Map((ref||[]).map(a=>[a.chave,a]));const vistos=new Set();
   for(const [u,h] of [['CDA',pt.cda],['CDI',pt.cdi]]){
    if(!h){base.unidades[u]={pasta:'(não selecionada)',arquivos:[],removidos:[]};continue;}
    const r=await listar(h,u);base.avisos.push(...r.avisos);
@@ -415,7 +420,7 @@
    for(const a of r.arquivos){
     const f=await a.handle.getFile();const chave=u+'|'+a.rel;vistos.add(chave);
     const ref=conhecidos.get(chave);
-    const status=!meta?'pendente':!ref?'novo':(ref.sig[0]!==f.size||ref.sig[1]!==f.lastModified)?'alterado':'em_dia';
+    const status=!(meta||D)?'pendente':!ref?'novo':(ref.sig[0]!==f.size||ref.sig[1]!==f.lastModified)?'alterado':'em_dia';
     base.resumo[status==='pendente'||status==='novo'?'novos':status==='alterado'?'alterados':'em_dia']++;
     arquivos.push({nome:a.rel,tamanho:f.size,modificado:new Date(f.lastModified).toISOString(),status});
    }
@@ -458,6 +463,23 @@
   const out=new Array(c.total);
   for(let i=0;i<c.total;i++){const o={};for(const k of FIELDS){const col=c.cols[k];o[k]=col.n?col.n[i]:col.d[col.i[i]];}out[i]=o;}
   return out;
+ }
+ function compartilhado(){const D=window.DADOS_PAINEL;return D&&D.b64?D:null;}
+ async function carregarPacote(D,p){
+  p&&p('Abrindo os dados salvos na pasta do sistema...');
+  const obj=JSON.parse(await gunzip(deB64(D.b64)));
+  return {cda:deColunar(obj.cda),cdi:deColunar(obj.cdi),arquivos:obj.arquivos||[],avisos:[],formatos:obj.formatos||{},formatos_avisos:obj.formatos_avisos||[],
+   colaboradores:obj.colaboradores||{},colaboradores_avisos:obj.colaboradores_avisos||[],comparativo:obj.comparativo||null,snapshot_gerado_em:D.gerado,cache_info:null,origem:'pasta'};
+ }
+ /* Grava SISTEMA/dados-painel.js: os dados prontos ficam na própria pasta e qualquer
+    computador que abrir o index.html dessa pasta carrega sem escolher pasta. */
+ async function gravarCompartilhado(sis,meta){
+  if(!sis)throw new Error('pasta SISTEMA não localizada');
+  if(typeof CompressionStream==='undefined')throw new Error('navegador sem suporte à compactação');
+  const {js}=await pacoteDados(meta,true,null,'DADOS_PAINEL');
+  const fh=await sis.getFileHandle('dados-painel.js',{create:true});
+  const w=await fh.createWritable();await w.write(js);await w.close();
+  return js.length;
  }
  async function carregarEquipe(progresso){
   const p=progresso||(()=>{});const D=window.DADOS_EQUIPE;
@@ -597,6 +619,7 @@
   html=html.replace(/<script src="assets\/xlsx\.full\.min\.js"[^>]*><\/script>\s*/,'')
    .replace(/<script>\/\* Leitor de planilhas:[\s\S]*?<\/script>\s*<script>if\(typeof XLSX[\s\S]*?<\/script>\s*/,'')
    .replace('<script src="leitor-navegador.js','<script>window.MODO_EQUIPE=true;document.documentElement.classList.add("modo-equipe");</script>\n<script src="dados-equipe.js?v='+Date.now()+'"></script>\n<script src="leitor-navegador.js')
+   .replace(/<script>document\.write\('<script src="dados-painel\.js[^\n]*\n/,'')
    .replace('<meta charset="utf-8"/>','<meta charset="utf-8"/>\n<meta name="robots" content="noindex,nofollow"/>')
    .replace('<title>Indicador de Confiabilidade | Gestão de Riscos</title>','<title>Indicador de Confiabilidade | Gestão de Riscos · Espelho</title>');
   out.push({path:'index.html',bytes:enc.encode(html)});
@@ -607,12 +630,13 @@
   out.push({path:'.nojekyll',bytes:new Uint8Array(0)});
   return out;
  }
- async function pacoteDados(meta,mostrarNomes,compAtual){
+ async function pacoteDados(meta,mostrarNomes,compAtual,variavel='DADOS_EQUIPE'){
   const dados=await montarDoCache(meta);
   const pacote={cda:colunar(dados.cda),cdi:colunar(dados.cdi),arquivos:dados.arquivos.map(a=>({unidade:a.unidade,arquivo:a.arquivo,registros:a.registros})),
    formatos:dados.formatos,formatos_avisos:[],colaboradores:mostrarNomes?dados.colaboradores:{},colaboradores_avisos:[],comparativo:compAtual||dados.comparativo||(await get('meta','comparativo').catch(()=>null))||null};
   const bytes=await gz(JSON.stringify(pacote));
-  const js='/* Espelho do Indicador de Confiabilidade · publicado em '+new Date().toLocaleString('pt-BR')+' */\nwindow.DADOS_EQUIPE={gerado:'+JSON.stringify(meta.gerado||new Date().toISOString())+',publicado:'+JSON.stringify(new Date().toISOString())+',registros:'+(dados.cda.length+dados.cdi.length)+',b64:"'+b64(bytes)+'"};\n';
+  const sigs=variavel==='DADOS_PAINEL'?',arquivos:'+JSON.stringify((meta.arquivos||[]).map(a=>({chave:a.chave,unidade:a.unidade,nome:a.nome,rel:a.rel,sig:a.sig,registros:a.registros}))):'';
+  const js='/* Indicador de Confiabilidade · dados gerados em '+new Date().toLocaleString('pt-BR')+' (não editar) */\nwindow.'+variavel+'={gerado:'+JSON.stringify(meta.gerado||new Date().toISOString())+',publicado:'+JSON.stringify(new Date().toISOString())+',registros:'+(dados.cda.length+dados.cdi.length)+sigs+',b64:"'+b64(bytes)+'"};\n';
   return {js,registros:dados.cda.length+dados.cdi.length};
  }
  async function publicarGitHub(progresso){
@@ -657,5 +681,5 @@
   return res;
  }
 
- window.LeitorNavegador={configGitHub,salvarConfigGitHub,interpretarRepo,publicarGitHub,ativo,equipe,suportado,obter,verificar,escolherPasta,pastas,limpar,carregarEquipe,gerarVersaoEquipe,lerComparativoAgora,comparativoSalvo,comparativoDeArquivo,garantirAcesso};
+ window.LeitorNavegador={configGitHub,salvarConfigGitHub,interpretarRepo,publicarGitHub,ativo,equipe,suportado,obter,verificar,escolherPasta,pastas,limpar,carregarEquipe,gerarVersaoEquipe,lerComparativoAgora,comparativoSalvo,comparativoDeArquivo,garantirAcesso,compartilhado};
 })();
